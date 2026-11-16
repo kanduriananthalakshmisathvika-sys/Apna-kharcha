@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apna Karcha</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #fff7f5;
+            color: #444;
+        }
+
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 30px 20px;
+            background: linear-gradient(180deg, #ffe0e8, #ffead5);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #df5874;
+            margin-bottom: 35px;
+        }
+
+        .sidebar a,
+        .sidebar button {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            color: #814454;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            text-align: left;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar button:hover {
+            background: white;
+        }
+
+        .main-content {
+            margin-left: 230px;
+            padding: 35px;
+        }
+
+        .flash {
+            background: #ffe0e8;
+            color: #a33d59;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>💗 Apna Karcha</h2>
+
+        <a href="{{ url_for('dashboard') }}">🏠 Dashboard</a>
+        <a href="{{ url_for('income') }}">💗 Income</a>
+        <a href="{{ url_for('expenses') }}">🧡 Expenses</a>
+        <a href="{{ url_for('reports') }}">📊 Reports</a>
+        <a href="{{ url_for('history') }}">📒 Transaction History</a>
+        <a href="{{ url_for('bank_import') }}">🏦 Bank Import</a>
+        <a href="{{ url_for('connect_bank') }}">🔗 Connect Bank</a>
+
+        <form action="{{ url_for('logout') }}" method="POST">
+            <button type="submit">🚪 Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </div>
+
+</body>
+</html>

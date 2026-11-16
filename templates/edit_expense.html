@@ -1,0 +1,132 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .edit-container {
+        max-width: 650px;
+        margin: 30px auto;
+        background: white;
+        padding: 35px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(255, 155, 84, 0.12);
+    }
+
+    .edit-container h1 {
+        color: #f28b4b;
+        margin-bottom: 10px;
+    }
+
+    .edit-container p {
+        color: #88747a;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #684b54;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 13px;
+        border: 1px solid #f7d5bd;
+        border-radius: 10px;
+        outline: none;
+        font-size: 15px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: #ffa15f;
+        box-shadow: 0 0 5px #ffe0c8;
+    }
+
+    .save-btn {
+        background: linear-gradient(90deg, #ff9b54, #ff8292);
+        color: white;
+        border: none;
+        padding: 13px 25px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .cancel-btn {
+        display: inline-block;
+        margin-left: 10px;
+        color: #e87885;
+        text-decoration: none;
+        font-weight: 600;
+    }
+</style>
+
+<div class="edit-container">
+
+    <h1>🧡 Edit Expense</h1>
+    <p>Update your expense details below.</p>
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input
+                type="number"
+                name="amount"
+                step="0.01"
+                min="0.01"
+                value="{{ item.amount }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <input
+                type="text"
+                name="category"
+                value="{{ item.category }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea
+                name="description"
+                rows="3"
+            >{{ item.description or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Date</label>
+            <input
+                type="date"
+                name="date"
+                value="{{ item.date.isoformat() }}"
+                required
+            >
+        </div>
+
+        <button type="submit" class="save-btn">
+            Save Changes 🧡
+        </button>
+
+        <a href="{{ url_for('history') }}" class="cancel-btn">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

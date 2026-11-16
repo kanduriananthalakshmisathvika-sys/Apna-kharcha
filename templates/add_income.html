@@ -1,0 +1,134 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.income-container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #fff5ed;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(233, 79, 135, 0.12);
+}
+
+.income-container h2 {
+    color: #e94f87;
+    margin-bottom: 10px;
+}
+
+.income-container p {
+    color: #79536b;
+    margin-bottom: 25px;
+}
+
+.income-form label {
+    display: block;
+    margin: 16px 0 7px;
+    color: #48263f;
+    font-weight: 600;
+}
+
+.income-form input,
+.income-form select,
+.income-form textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #f3c4d5;
+    border-radius: 10px;
+    background: white;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.income-form input:focus,
+.income-form select:focus,
+.income-form textarea:focus {
+    outline: none;
+    border-color: #e94f87;
+    box-shadow: 0 0 5px #f5b5cd;
+}
+
+.income-btn {
+    width: 100%;
+    margin-top: 25px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #e94f87, #ff9b54);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.income-btn:hover {
+    opacity: 0.9;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 18px;
+    color: #e94f87;
+    text-decoration: none;
+    font-weight: 600;
+}
+</style>
+
+<div class="income-container">
+
+    <h2>💗 Add New Income</h2>
+    <p>Record your earnings and keep track of your money!</p>
+
+    <form method="POST" class="income-form">
+
+        <label>Amount (₹)</label>
+        <input
+            type="number"
+            name="amount"
+            placeholder="Enter amount"
+            min="0.01"
+            step="0.01"
+            required
+        >
+
+        <label>Income Category</label>
+        <select name="category" required>
+            <option value="">Select category</option>
+            <option value="Salary">Salary</option>
+            <option value="Business">Business</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Investment">Investment</option>
+            <option value="Gift">Gift</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label>Description</label>
+        <textarea
+            name="description"
+            rows="3"
+            placeholder="Enter a short description (optional)"
+        ></textarea>
+
+        <label>Date</label>
+        <input
+            type="date"
+            name="date"
+            value="{{ today }}"
+            required
+        >
+
+        <button type="submit" class="income-btn">
+            💗 Save Income
+        </button>
+
+    </form>
+
+    <a href="{{ url_for('dashboard') }}" class="back-link">
+        ← Back to Dashboard
+    </a>
+
+</div>
+
+{% endblock %}

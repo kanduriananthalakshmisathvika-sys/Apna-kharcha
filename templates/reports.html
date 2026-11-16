@@ -1,0 +1,408 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .reports-header {
+        margin-bottom: 30px;
+    }
+
+    .reports-header h2 {
+        color: #d96c65;
+        font-weight: 700;
+    }
+
+    .reports-header p {
+        color: #888;
+    }
+
+    .summary-card {
+        border: none;
+        border-radius: 18px;
+        padding: 24px;
+        height: 100%;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+        transition: transform 0.2s;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .summary-card h6 {
+        color: #777;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .summary-card h3 {
+        font-weight: 700;
+        margin: 0;
+        font-size: 25px;
+    }
+
+    .income-card {
+        background: #fff0f3;
+    }
+
+    .expense-card {
+        background: #fff0e6;
+    }
+
+    .balance-card {
+        background: #fff7d9;
+    }
+
+    .income-card h3 {
+        color: #df7095;
+    }
+
+    .expense-card h3 {
+        color: #ed9658;
+    }
+
+    .balance-card h3 {
+        color: #c69b37;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+        height: 100%;
+    }
+
+    .chart-card h5 {
+        color: #d96c65;
+        font-weight: 700;
+        margin-bottom: 22px;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 320px;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #999;
+        padding: 35px 10px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 260px;
+        }
+
+        .summary-card h3 {
+            font-size: 21px;
+        }
+    }
+</style>
+
+<div class="reports-header">
+    <h2>📊 Financial Reports</h2>
+    <p>Track your income, expenses and savings at a glance.</p>
+</div>
+
+<!-- SUMMARY CARDS -->
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+        <div class="summary-card income-card">
+            <h6>💗 Total Income</h6>
+            <h3>₹{{ "%.2f"|format(total_income|float) }}</h3>
+            <small class="text-muted">Your total earnings</small>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="summary-card expense-card">
+            <h6>🧡 Total Expenses</h6>
+            <h3>₹{{ "%.2f"|format(total_expenses|float) }}</h3>
+            <small class="text-muted">Your total spending</small>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="summary-card balance-card">
+            <h6>💰 Remaining Balance</h6>
+            <h3>₹{{ "%.2f"|format(balance|float) }}</h3>
+            <small class="text-muted">Income minus expenses</small>
+        </div>
+    </div>
+
+</div>
+
+<!-- CHARTS -->
+
+<div class="row g-4">
+
+    <!-- EXPENSE CATEGORY PIE CHART -->
+
+    <div class="col-lg-5">
+        <div class="chart-card">
+
+            <h5>🍩 Expenses by Category</h5>
+
+            {% if expense_categories %}
+
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+            {% else %}
+
+                <div class="empty-message">
+                    <h2>📭</h2>
+                    <p>No expense records available yet.</p>
+                    <small>Add expenses to see your category report.</small>
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- MONTHLY INCOME VS EXPENSE CHART -->
+
+    <div class="col-lg-7">
+        <div class="chart-card">
+
+            <h5>📈 Monthly Income vs Expenses</h5>
+
+            {% if monthly_income or monthly_expenses %}
+
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+
+            {% else %}
+
+                <div class="empty-message">
+                    <h2>📊</h2>
+                    <p>No monthly records available yet.</p>
+                    <small>Add income or expenses to see your monthly report.</small>
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<!-- MONTHLY DATA PREPARATION -->
+
+{% set ns = namespace(months=[]) %}
+
+{% for item in monthly_income %}
+    {% if item.month not in ns.months %}
+        {% set ns.months = ns.months + [item.month] %}
+    {% endif %}
+{% endfor %}
+
+{% for item in monthly_expenses %}
+    {% if item.month not in ns.months %}
+        {% set ns.months = ns.months + [item.month] %}
+    {% endif %}
+{% endfor %}
+
+{% set values = namespace(income=[], expenses=[]) %}
+
+{% for month in ns.months %}
+
+    {% set income_row = monthly_income | selectattr('month', 'equalto', month) | first | default(none) %}
+
+    {% set expense_row = monthly_expenses | selectattr('month', 'equalto', month) | first | default(none) %}
+
+    {% set values.income = values.income + [income_row.total|float if income_row else 0] %}
+
+    {% set values.expenses = values.expenses + [expense_row.total|float if expense_row else 0] %}
+
+{% endfor %}
+
+<!-- CHART.JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    // EXPENSE CATEGORY CHART
+
+    {% if expense_categories %}
+
+    const categoryLabels = {{ expense_categories | map(attribute='category') | list | tojson }};
+
+    const categoryValues = {{ expense_categories | map(attribute='total') | list | tojson }};
+
+    const categoryCanvas = document.getElementById('categoryChart');
+
+    new Chart(categoryCanvas, {
+        type: 'doughnut',
+
+        data: {
+            labels: categoryLabels,
+
+            datasets: [{
+                data: categoryValues,
+
+                backgroundColor: [
+                    '#ff8a80',
+                    '#ffb36b',
+                    '#f7c873',
+                    '#e99ab0',
+                    '#b9a0d9',
+                    '#8ec5b5',
+                    '#f49cbb',
+                    '#a5b8e8'
+                ],
+
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 8
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    position: 'bottom',
+
+                    labels: {
+                        padding: 18,
+                        usePointStyle: true
+                    }
+                },
+
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ₹' +
+                                Number(context.raw).toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    {% endif %}
+
+
+    // MONTHLY INCOME VS EXPENSE CHART
+
+    {% if monthly_income or monthly_expenses %}
+
+    const monthlyLabels = {{ ns.months | tojson }};
+
+    const incomeValues = {{ values.income | tojson }};
+
+    const expenseValues = {{ values.expenses | tojson }};
+
+    const monthlyCanvas = document.getElementById('monthlyChart');
+
+    new Chart(monthlyCanvas, {
+        type: 'bar',
+
+        data: {
+            labels: monthlyLabels,
+
+            datasets: [
+
+                {
+                    label: 'Income',
+
+                    data: incomeValues,
+
+                    backgroundColor: '#f28eaa',
+
+                    borderRadius: 7,
+
+                    borderSkipped: false
+                },
+
+                {
+                    label: 'Expenses',
+
+                    data: expenseValues,
+
+                    backgroundColor: '#ffb36b',
+
+                    borderRadius: 7,
+
+                    borderSkipped: false
+                }
+
+            ]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+
+            scales: {
+
+                y: {
+                    beginAtZero: true,
+
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value;
+                        }
+                    },
+
+                    grid: {
+                        color: '#f1f1f1'
+                    }
+                },
+
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+
+            },
+
+            plugins: {
+
+                legend: {
+                    position: 'bottom',
+
+                    labels: {
+                        usePointStyle: true,
+                        padding: 18
+                    }
+                },
+
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ₹' +
+                                Number(context.raw).toFixed(2);
+                        }
+                    }
+                }
+
+            }
+        }
+    });
+
+    {% endif %}
+
+</script>
+
+{% endblock %}

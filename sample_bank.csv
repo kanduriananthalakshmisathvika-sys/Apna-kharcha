@@ -1,0 +1,5 @@
+date,description,amount,type,category
+2026-11-15,Salary credited,100000,Income,Salary
+2026-11-15,Food order,2500,Expense,Food
+2026-11-16,Petrol payment,1500,Expense,Travel
+2026-11-16,Interest credited,500,Income,Investment

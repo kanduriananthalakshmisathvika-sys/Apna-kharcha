@@ -1,0 +1,308 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px 5px 30px;
+    }
+
+    .welcome-section {
+        background: linear-gradient(120deg, #ffe0e8, #ffead5);
+        padding: 30px;
+        border-radius: 22px;
+        margin-bottom: 28px;
+    }
+
+    .welcome-section h1 {
+        color: #bd4968;
+        font-size: 28px;
+        margin: 0 0 10px;
+    }
+
+    .welcome-section p {
+        color: #875568;
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .section-heading {
+        color: #713e50;
+        font-size: 19px;
+        margin: 28px 0 16px;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .summary-card {
+        padding: 24px;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 5px 18px rgba(110, 65, 75, 0.07);
+        border: 1px solid #f8e8e9;
+        min-width: 0;
+    }
+
+    .summary-card.income {
+        border-top: 5px solid #f58bab;
+    }
+
+    .summary-card.expenses {
+        border-top: 5px solid #ffad70;
+    }
+
+    .summary-card.balance {
+        border-top: 5px solid #d98ac0;
+        background: linear-gradient(145deg, #fff, #fff1f7);
+    }
+
+    .card-label {
+        color: #856a75;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 13px;
+    }
+
+    .card-amount {
+        color: #44313b;
+        font-size: 25px;
+        font-weight: bold;
+        overflow-wrap: anywhere;
+    }
+
+    .card-note {
+        color: #a18d95;
+        font-size: 12px;
+        margin-top: 10px;
+    }
+
+    .transactions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+        align-items: start;
+    }
+
+    .transaction-card {
+        background: white;
+        border: 1px solid #f4e5e8;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 5px 18px rgba(110, 65, 75, 0.05);
+        min-width: 0;
+    }
+
+    .transaction-card h3 {
+        font-size: 17px;
+        margin: 0 0 18px;
+    }
+
+    .income-heading {
+        color: #d75d83;
+    }
+
+    .expense-heading {
+        color: #e68b45;
+    }
+
+    .transaction-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .transaction-table th {
+        color: #9b8790;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background: #fff7f8;
+    }
+
+    .transaction-table td {
+        padding: 14px 8px;
+        border-bottom: 1px solid #f5edf0;
+        color: #55434c;
+        font-size: 13px;
+    }
+
+    .transaction-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .income-amount {
+        color: #d65d83;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .expense-amount {
+        color: #e68b45;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .empty-message {
+        color: #a18d95;
+        text-align: center;
+        padding: 22px 5px;
+        font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .transactions-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 550px) {
+        .dashboard {
+            padding: 5px 0 20px;
+        }
+
+        .welcome-section {
+            padding: 22px;
+        }
+
+        .welcome-section h1 {
+            font-size: 23px;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+            gap: 13px;
+        }
+
+        .summary-card {
+            padding: 20px;
+        }
+
+        .transaction-card {
+            padding: 15px;
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="dashboard">
+
+    <div class="welcome-section">
+        <h1>Hello, {{ g.user.username }}! 🌸</h1>
+        <p>Your finances, beautifully organised. Here's your money overview.</p>
+    </div>
+
+    <h2 class="section-heading">Your Financial Overview</h2>
+
+    <div class="summary-grid">
+
+        <div class="summary-card income">
+            <div class="card-label">💗 Total Income</div>
+            <div class="card-amount">
+                ₹{{ "%.2f"|format(total_income) }}
+            </div>
+            <div class="card-note">Your total earnings</div>
+        </div>
+
+        <div class="summary-card expenses">
+            <div class="card-label">🧡 Total Expenses</div>
+            <div class="card-amount">
+                ₹{{ "%.2f"|format(total_expenses) }}
+            </div>
+            <div class="card-note">Your total spending</div>
+        </div>
+
+        <div class="summary-card balance">
+            <div class="card-label">💰 Available Balance</div>
+            <div class="card-amount">
+                ₹{{ "%.2f"|format(balance) }}
+            </div>
+            <div class="card-note">Your remaining money</div>
+        </div>
+
+    </div>
+
+    <h2 class="section-heading">Recent Transactions</h2>
+
+    <div class="transactions-grid">
+
+        <div class="transaction-card">
+            <h3 class="income-heading">💗 Recent Income</h3>
+
+            {% if recent_income %}
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in recent_income %}
+                    <tr>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.date.strftime('%d %b %Y') }}</td>
+                        <td class="income-amount">
+                            ₹{{ "%.2f"|format(item.amount) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div class="empty-message">
+                    No income records yet.
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="transaction-card">
+            <h3 class="expense-heading">🧡 Recent Expenses</h3>
+
+            {% if recent_expenses %}
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in recent_expenses %}
+                    <tr>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.date.strftime('%d %b %Y') }}</td>
+                        <td class="expense-amount">
+                            ₹{{ "%.2f"|format(item.amount) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div class="empty-message">
+                    No expense records yet.
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

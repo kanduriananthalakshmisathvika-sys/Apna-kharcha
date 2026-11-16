@@ -1,0 +1,162 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="page-header">
+        <h1>🏦 Import Bank Statement</h1>
+        <p>Bring your transactions into Apna Karcha automatically!</p>
+    </div>
+
+    <div class="form-container">
+        <h2>Upload Your CSV File 💗</h2>
+
+        <form method="POST"
+              action="{{ url_for('bank_import') }}"
+              enctype="multipart/form-data">
+
+            <div class="form-group">
+                <label for="file">Choose Bank Statement</label>
+                <input
+                    type="file"
+                    id="file"
+                    name="file"
+                    accept=".csv"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn">
+                Import Transactions 🧡
+            </button>
+        </form>
+    </div>
+
+    <div class="form-container">
+        <h2>📋 CSV Format</h2>
+        <p>Your CSV file must contain these columns:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>date</th>
+                    <th>description</th>
+                    <th>amount</th>
+                    <th>type</th>
+                    <th>category</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2026-11-15</td>
+                    <td>Salary credited</td>
+                    <td>100000</td>
+                    <td>Income</td>
+                    <td>Salary</td>
+                </tr>
+                <tr>
+                    <td>2026-11-15</td>
+                    <td>Food order</td>
+                    <td>2500</td>
+                    <td>Expense</td>
+                    <td>Food</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="info-text">
+            Category is optional. Apna Karcha will suggest a category
+            when it is missing.
+        </p>
+
+        <p class="info-text">
+            Supported types: Income, Expense, Credit, Debit.
+        </p>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+    }
+
+    .page-header {
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        color: #e65b91;
+    }
+
+    .form-container {
+        background: white;
+        padding: 25px;
+        margin-bottom: 25px;
+        border-radius: 18px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    }
+
+    .form-container h2 {
+        color: #e65b91;
+        margin-bottom: 18px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px dashed #f3a1bc;
+        border-radius: 10px;
+        background: #fff8fb;
+    }
+
+    .btn {
+        background: linear-gradient(135deg, #f47c9c, #ff9c61);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #f5dce5;
+        text-align: left;
+    }
+
+    th {
+        background: #fff0f5;
+        color: #d94f83;
+    }
+
+    .info-text {
+        color: #777;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+</style>
+
+{% endblock %}
